@@ -27,7 +27,7 @@ function AdminDashboard() {
 
   const leads = useQuery(api.leads.list) || [];
   const stats = useQuery(api.leads.stats) || { total: 0, today: 0 };
-  const publicUrl = window.location.origin;
+  const publicUrl = "https://craftsilicon.netlify.app/";
 
   const filteredLeads = leads.filter(
     (lead) =>
