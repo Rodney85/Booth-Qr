@@ -1,0 +1,147 @@
+import { PrecisionButton } from "@/components/ui/PrecisionButton";
+import * as Icons from "lucide-react";
+import type { FlowState } from "@/types/flow";
+import { ChevronLeft } from "lucide-react";
+
+interface ProductExplorerProps {
+  flow: FlowState;
+  onFinish: () => void;
+}
+
+export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
+  const isDetail = flow.currentScreen.id === "product_detail";
+  const screen = flow.currentScreen;
+
+  if (isDetail) {
+    return (
+      <div className="flex flex-1 flex-col px-6 pt-10">
+        <button 
+          onClick={() => flow.goToStep("product_list")}
+          className="mb-8 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-medium tracking-[0.05em] text-white/50 transition hover:bg-white/10 hover:text-white"
+        >
+          <ChevronLeft size={10} /> BACK TO SOLUTIONS
+        </button>
+
+        <div className="flex flex-col gap-6">
+          <div className="aspect-[16/10] w-full rounded-2xl bg-[#132952] border border-white/5 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3 opacity-20">
+              <Icons.Layout size={40} />
+              <span className="text-[10px] uppercase tracking-widest font-bold">Solution Overview</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[26px] font-bold tracking-[-0.03em] text-white">
+              {flow.interpolate(screen.content.header)}
+            </h2>
+            <p className="text-[14px] leading-[1.6] text-white/50">
+               {screen.content.overview}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-auto pb-10 flex flex-col gap-3">
+          <PrecisionButton onClick={() => {
+             // If they are on detail, we assume they are interested in THIS product
+             const productId = flow.screens.find(s => s.id === "product_list")?.content.options?.find(o => o.label === flow.interpolate(screen.content.header))?.id;
+             if (productId && !flow.selectedProductIds.includes(productId)) {
+                flow.toggleProductSelect(productId);
+             }
+             onFinish();
+          }}>
+            {screen.content.primary_cta}
+          </PrecisionButton>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col px-6 pt-10">
+      <div className="flex flex-col gap-1">
+        <button 
+          onClick={() => flow.goBack()}
+          className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-medium tracking-[0.05em] text-white/50 transition hover:bg-white/10 hover:text-white"
+        >
+          <ChevronLeft size={10} /> BACK
+        </button>
+        <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
+          {screen.content.step_label}
+        </div>
+        <h2 
+          className="mt-1 text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-white"
+          dangerouslySetInnerHTML={{ __html: flow.interpolate(screen.content.question) }}
+        />
+        <p className="mt-3 text-[13px] leading-[1.5] text-white/50">
+          {flow.interpolate(screen.content.subtext)}
+        </p>
+      </div>
+
+      <div className="mt-8 grid grid-cols-2 gap-3 pb-32">
+        {screen.content.options?.map((opt) => {
+          const IconComponent = (Icons as any)[opt.icon || ""] || Icons.HelpCircle;
+          const isSelected = flow.selectedProductIds.includes(opt.id);
+          
+          return (
+            <button
+              key={opt.id}
+              onClick={() => {
+                flow.toggleProductSelect(opt.id);
+              }}
+              className={`flex flex-col rounded-2xl border p-4 transition-all duration-300 ${
+                isSelected 
+                  ? "border-[#3D94F5] bg-[#3D94F5]/10 shadow-[0_0_20px_rgba(61,148,245,0.1)]" 
+                  : "border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.05]"
+              }`}
+            >
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                isSelected ? "bg-[#3D94F5] text-white" : "bg-white/5 text-white/40"
+              }`}>
+                <IconComponent size={18} />
+              </div>
+              
+              <div className="mt-4 flex flex-col gap-1.5">
+                <span className="text-[14px] font-bold tracking-tight text-white">
+                  {opt.label}
+                </span>
+                <span className="text-[10px] leading-[1.4] text-white/40 line-clamp-3">
+                  {opt.description}
+                </span>
+                {opt.proof && (
+                  <div className="mt-2 text-[9px] font-semibold uppercase tracking-wider text-[#3D94F5]/80">
+                    {opt.proof}
+                  </div>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Sticky Footer */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 px-6 pb-10 pt-4 bg-[#071426]/90 backdrop-blur-md border-t border-white/5">
+        {flow.selectedProductIds.length > 0 ? (
+          <PrecisionButton 
+            className="w-full" 
+            onClick={onFinish}
+          >
+            {flow.selectedProductIds.length > 1 
+              ? "Prepare my selected briefs →"
+              : (screen.content.options?.find(o => o.id === flow.selectedProductIds[0])?.cta_label || "Prepare my brief →")
+            }
+          </PrecisionButton>
+        ) : (
+          <button 
+            className="w-full text-center text-[11px] font-bold uppercase tracking-widest text-[#3D94F5] hover:text-[#3D94F5]/80 transition-colors py-4" 
+            onClick={flow.handleSkip}
+          >
+            {screen.content.skip_cta}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+

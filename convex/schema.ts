@@ -7,6 +7,8 @@ export default defineSchema({
     email: v.string(),
     phone: v.string(),
     organisation: v.string(),
+    productInterest: v.optional(v.string()),
+    status: v.string(), // "new", "contacted", "qualified", "archived"
     eventId: v.string(),
     createdAt: v.number(),
   })

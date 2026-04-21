@@ -1,214 +1,111 @@
-import { FormEvent, useState } from "react";
+// Interactive Concierge Lead Form
+import { AnimatePresence, motion } from "framer-motion";
+import { useConversationalFlow } from "@/lib/useConversationalFlow";
+import { SplashScreen } from "./SplashScreen";
+import { ProductExplorer } from "@/components/ProductExplorer";
+import { IdentificationScreen } from "./screens/IdentificationScreen";
+import { ContactScreen } from "./screens/ContactScreen";
+import { SuccessScreen } from "./screens/SuccessScreen";
+import { ContextBand } from "./ContextBand";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { navigateTo } from "../lib/utils";
-import { motion, useReducedMotion } from "framer-motion";
-import { Settings } from "lucide-react";
 
 export default function LeadForm() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    organisation: "",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const flow = useConversationalFlow();
   const submitLead = useMutation(api.leads.submit);
-  const shouldReduceMotion = useReducedMotion();
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email))
-      newErrors.email = "Valid email is required";
-    if (!formData.phone.trim() || formData.phone.replace(/\D/g, "").length < 6)
-      newErrors.phone = "Valid phone number is required";
-    if (!formData.organisation.trim())
-      newErrors.organisation = "Organisation is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleBlur = () => {
-    validate();
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-
-    setIsSubmitting(true);
+  const handleFinish = async () => {
     try {
-      await submitLead({ ...formData });
-      navigateTo("/success");
+      const currentData = flow.formData;
+      const gridScreen = flow.screens.find((s) => s.id === "product_list");
+      const interests = flow.selectedProductIds.length > 0
+        ? flow.selectedProductIds
+            .map(id => gridScreen?.content.options?.find((o) => o.id === id)?.label || id)
+            .join(", ")
+        : "just-contact";
+
+      await submitLead({
+        name: currentData.name || "",
+        email: currentData.email || "",
+        phone: currentData.phone || "",
+        organisation: currentData.organisation || "",
+        productInterest: interests,
+      });
+      flow.goToStep("success");
     } catch (err) {
-      console.error(err);
-      setErrors({ submit: "Failed to submit. Please try again." });
-    } finally {
-      setIsSubmitting(false);
+      console.error("Submission failed", err);
     }
   };
 
+  const renderStep = () => {
+    const screen = flow.currentScreen;
+    if (!screen) return null;
+    
+    switch (screen.id) {
+      case "splash":
+        return <SplashScreen headline={screen.content.headline || ""} subtext={screen.content.subtext || ""} />;
+      case "name":
+      case "organisation":
+        return <IdentificationScreen flow={flow} />;
+      case "contact":
+        return <ContactScreen flow={flow} />;
+      case "product_list":
+      case "product_detail":
+        return <ProductExplorer flow={flow} onFinish={handleFinish} />;
+      case "success":
+        return <SuccessScreen flow={flow} />;
+      default:
+        return null;
+    }
+  };
+
+  const showProgress = !["splash", "success"].includes(flow.currentScreen?.id || "");
+
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[var(--color-cs-navy-deep)] px-6 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 0.3, ease: "easeOut" }}
-        className="w-full max-w-[420px]"
-      >
-        <div className="mb-8 text-center text-[var(--text-dark-3)]">
-          <p className="text-[12px] font-normal uppercase tracking-[0.12em]">
-            Craft Silicon
-          </p>
-          <div className="mx-auto mt-2 h-[1px] w-8 bg-[var(--color-cs-blue)] opacity-50" />
-          <p className="mt-3 text-[11px] leading-[1.47] tracking-[-0.08px]">
-            OSR Growth Conference 2026 · Tamarind Tree Hotel
-          </p>
+    <div className="relative flex min-h-[100dvh] w-full flex-col bg-[#071426] font-inter overflow-x-hidden">
+      {/* Progress Dots - Sticky at top */}
+      {showProgress && (
+        <div className="flex gap-1.5 justify-center py-6 px-6 shrink-0 z-10 bg-[#071426]">
+          {flow.screens
+            .filter(s => !["splash", "success"].includes(s.id))
+            .map((s) => {
+              const activeIndex = flow.screens.findIndex(scr => scr.id === flow.currentScreen.id);
+              const screenIndex = flow.screens.findIndex(scr => scr.id === s.id);
+              const isDone = activeIndex > screenIndex;
+              const isDotActive = activeIndex === screenIndex;
+              
+              return (
+                <div 
+                  key={s.id}
+                  className={`h-[3px] rounded-full transition-all duration-300 ${
+                    isDotActive || isDone ? "flex-1 max-w-[40px] bg-[var(--color-cs-blue)]" : "flex-1 max-w-[20px] bg-white/15"
+                  }`}
+                />
+              );
+            })}
         </div>
+      )}
 
-        <h1 className="text-center text-[28px] font-semibold leading-[1.10] tracking-[-0.28px] text-white">
-          Let's Connect
-        </h1>
-        <p className="mb-[32px] mt-2 text-center text-[13px] leading-[1.38] tracking-[-0.16px] text-[var(--text-dark-2)]">
-          Drop your details and our team will be in touch.
-        </p>
+      {/* Context Band */}
+      {flow.currentScreen.id === "name" && flow.currentScreen.content.context_stats && (
+        <ContextBand stats={flow.currentScreen.content.context_stats} />
+      )}
 
-        <form onSubmit={onSubmit} className="flex flex-col gap-[24px]">
-          {/* Name Field */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="name"
-              className="mb-[8px] text-[11px] font-medium uppercase leading-[1] tracking-[0.08em] text-[rgba(255,255,255,0.40)]"
-            >
-              Full Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              onBlur={handleBlur}
-              className={`w-full border-b bg-transparent py-[10px] text-[15px] tracking-[-0.20px] text-white outline-none transition-colors duration-180 ease-out focus:border-[var(--color-cs-blue)] ${errors.name ? "border-[var(--color-cs-error)]" : "border-[var(--color-cs-navy-border)]"}`}
-            />
-            {errors.name && (
-              <p className="mt-[6px] text-[12px] leading-[1.40] text-[var(--color-cs-error)]">
-                {errors.name}
-              </p>
-            )}
-          </div>
-
-          {/* Email Field */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="email"
-              className="mb-[8px] text-[11px] font-medium uppercase leading-[1] tracking-[0.08em] text-[rgba(255,255,255,0.40)]"
-            >
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              onBlur={handleBlur}
-              className={`w-full border-b bg-transparent py-[10px] text-[15px] tracking-[-0.20px] text-white outline-none transition-colors duration-180 ease-out focus:border-[var(--color-cs-blue)] ${errors.email ? "border-[var(--color-cs-error)]" : "border-[var(--color-cs-navy-border)]"}`}
-            />
-            {errors.email && (
-              <p className="mt-[6px] text-[12px] leading-[1.40] text-[var(--color-cs-error)]">
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          {/* Phone Field */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="phone"
-              className="mb-[8px] text-[11px] font-medium uppercase leading-[1] tracking-[0.08em] text-[rgba(255,255,255,0.40)]"
-            >
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              onBlur={handleBlur}
-              className={`w-full border-b bg-transparent py-[10px] text-[15px] tracking-[-0.20px] text-white outline-none transition-colors duration-180 ease-out focus:border-[var(--color-cs-blue)] ${errors.phone ? "border-[var(--color-cs-error)]" : "border-[var(--color-cs-navy-border)]"}`}
-            />
-            {errors.phone && (
-              <p className="mt-[6px] text-[12px] leading-[1.40] text-[var(--color-cs-error)]">
-                {errors.phone}
-              </p>
-            )}
-          </div>
-
-          {/* Organisation Field */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="organisation"
-              className="mb-[8px] text-[11px] font-medium uppercase leading-[1] tracking-[0.08em] text-[rgba(255,255,255,0.40)]"
-            >
-              Organisation
-            </label>
-            <input
-              id="organisation"
-              type="text"
-              placeholder="County, Ministry, or Company"
-              value={formData.organisation}
-              onChange={(e) =>
-                setFormData({ ...formData, organisation: e.target.value })
-              }
-              onBlur={handleBlur}
-              className={`w-full border-b bg-transparent py-[10px] text-[15px] tracking-[-0.20px] text-white outline-none transition-colors duration-180 ease-out placeholder:text-[var(--text-dark-3)] focus:border-[var(--color-cs-blue)] ${errors.organisation ? "border-[var(--color-cs-error)]" : "border-[var(--color-cs-navy-border)]"}`}
-            />
-            {errors.organisation && (
-              <p className="mt-[6px] text-[12px] leading-[1.40] text-[var(--color-cs-error)]">
-                {errors.organisation}
-              </p>
-            )}
-          </div>
-
-          {errors.submit && (
-            <p className="text-center text-[13px] text-[var(--color-cs-error)]">
-              {errors.submit}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            aria-disabled={isSubmitting}
-            className="mt-[8px] w-full rounded-[8px] bg-[var(--color-cs-blue)] px-[24px] py-[14px] text-[15px] font-medium tracking-[0.02em] text-white transition hover:bg-[var(--color-cs-blue-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {isSubmitting ? "Submitting…" : "Connect with Craft Silicon →"}
-          </button>
-        </form>
-
-        <p className="mt-[20px] text-center text-[11px] leading-[1.47] tracking-[-0.08px] text-[var(--text-dark-3)]">
-          Your details are kept private and used only for follow-up.
-        </p>
-
-        <div className="mt-[48px] flex justify-center">
-          <button
-            onClick={() => navigateTo("/admin")}
-            className="flex h-11 w-11 items-center justify-center text-[rgba(255,255,255,0.08)] transition hover:text-[rgba(255,255,255,0.2)]"
-            aria-label="Admin Access"
-          >
-            <Settings size={20} />
-          </button>
-        </div>
-      </motion.div>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={flow.currentScreen.id}
+          initial={{ opacity: 0, x: flow.direction * 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: flow.direction * -30 }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          className="flex flex-1 flex-col pb-10"
+        >
+          {renderStep()}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
+
+
+

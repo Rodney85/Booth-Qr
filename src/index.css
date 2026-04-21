@@ -2,36 +2,53 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand Precision Colors */
   --color-cs-navy-deep: #071426;
   --color-cs-navy-mid: #0D2045;
   --color-cs-navy-surface: #132952;
-  --color-cs-navy-border: rgba(255, 255, 255, 0.10);
+  --color-cs-navy-border: rgba(255, 255, 255, 0.08);
   
   --color-cs-blue: #0A6AE2;
+  --color-cs-blue-stat: #3D94F5;
   --color-cs-blue-hover: #0D7AF8;
-  --color-cs-blue-dark: #3D94F5;
   
-  --color-cs-light-bg: #EEF2F8;
-  --color-cs-light-surface: #ffffff;
-  --color-cs-light-border: rgba(7, 20, 38, 0.10);
-
-  --color-cs-error: #D93025;
-  --color-cs-success: #1A7F48;
-
-  --color-text-dark-1: #FFFFFF;
-  --color-text-dark-2: rgba(255, 255, 255, 0.60);
-  --color-text-dark-3: rgba(255, 255, 255, 0.35);
+  /* Text States (Solid) */
+  --color-text-dark-primary: #FFFFFF;
+  --color-text-dark-secondary: rgba(255, 255, 255, 0.45);
+  --color-text-dark-tertiary: rgba(255, 255, 255, 0.28);
   
-  --color-text-light-1: #071426;
-  --color-text-light-2: rgba(7, 20, 38, 0.55);
-  --color-text-light-3: rgba(7, 20, 38, 0.36);
+  /* Typography Scale */
+  --font-inter: 'Inter', system-ui, sans-serif;
   
-  --font-inter: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Motion Patterns */
+  --transition-standard: 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @layer base {
   body {
-    @apply font-inter antialiased;
+    @apply font-inter antialiased bg-[#071426] text-white;
     font-optical-sizing: auto;
+  }
+}
+
+@layer components {
+  .precision-input-wrap {
+    @apply relative flex flex-col gap-2;
+  }
+  
+  .precision-label {
+    @apply text-[10px] uppercase tracking-[0.10em] text-white/35;
+  }
+  
+  .precision-input {
+    @apply w-full border-b border-white/15 bg-transparent py-2.5 text-base text-white outline-none transition-colors duration-200 focus:border-b-[#0A6AE2];
+  }
+
+  .precision-card {
+    @apply flex flex-col gap-2 rounded-xl border border-white/7 bg-[#0D2045] p-4 transition-all duration-200 hover:border-[#0A6AE2]/50 hover:bg-[#132952];
+  }
+
+  .precision-card-selected {
+    @apply border-[#0A6AE2] bg-[#132952];
   }
 }

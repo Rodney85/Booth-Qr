@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import LeadForm from "./components/LeadForm";
-import SuccessScreen from "./components/SuccessScreen";
 import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
@@ -14,12 +13,10 @@ function App() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  if (currentPath === "/admin") {
-    return <AdminDashboard />;
-  }
+  const normalizedPath = currentPath.toLowerCase().replace(/\/$/, "");
 
-  if (currentPath === "/success") {
-    return <SuccessScreen />;
+  if (normalizedPath === "/admin") {
+    return <AdminDashboard />;
   }
 
   return <LeadForm />;

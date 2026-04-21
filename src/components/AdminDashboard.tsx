@@ -1,15 +1,57 @@
 import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { SignedIn, SignedOut, SignIn, useClerk } from "@clerk/clerk-react";
-import { Search, LogOut, Download, QrCode, X } from "lucide-react";
+import { SignedIn, SignedOut, SignIn, useClerk, useUser } from "@clerk/clerk-react";
+import { Search, LogOut, Download, QrCode, X, Mail, Building2, Clock, Globe } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { CONFIG } from "@/lib/config";
 
 export default function AdminDashboardWrapper() {
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) return null;
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const isAdmin = role === "admin" || import.meta.env.DEV;
+
   return (
     <>
       <SignedIn>
-        <AdminDashboard />
+        {isAdmin ? (
+          <AdminDashboard />
+        ) : (
+          <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[var(--color-cs-light-bg)] px-6 text-center">
+            <h1 className="text-[24px] font-bold text-[#071426]">Access Denied</h1>
+            <p className="mt-2 text-[14px] text-[#071426]/60 max-w-[320px]">
+              This dashboard is restricted to authorized administrative personnel only.
+            </p>
+            
+            <div className="mt-8 rounded-[12px] border border-[#071426]/5 bg-white p-6 shadow-sm">
+              <h2 className="text-[12px] font-semibold uppercase tracking-wider text-[#071426]/40">Diagnostic Info</h2>
+              <div className="mt-4 flex flex-col gap-2 text-left">
+                <div className="flex justify-between gap-8 text-[13px]">
+                  <span className="text-[#071426]/40 text-nowrap">Your ID:</span>
+                  <span className="font-mono text-[#071426] truncate max-w-[140px]">{user?.id}</span>
+                </div>
+                <div className="flex justify-between gap-8 text-[13px]">
+                  <span className="text-[#071426]/40 text-nowrap">Current Role:</span>
+                  <span className={`font-medium ${role ? "text-[var(--color-cs-blue)]" : "text-amber-500"}`}>
+                    {role || "None detected"}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-4 text-[11px] text-[#071426]/30 max-w-[240px]">
+                If your role is "None detected", please sign out and sign back in to refresh your seat.
+              </p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-6 w-full rounded-[8px] border border-[#071426]/10 py-[8px] text-[12px] font-medium text-[#071426]/60 hover:bg-[#F7F9FC]"
+              >
+                Refresh Session
+              </button>
+            </div>
+          </div>
+        )}
       </SignedIn>
       <SignedOut>
         <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--color-cs-light-bg)]">
@@ -24,29 +66,32 @@ function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showQR, setShowQR] = useState(false);
   const { signOut } = useClerk();
+  const updateStatus = useMutation(api.leads.updateStatus);
 
   const leads = useQuery(api.leads.list) || [];
   const stats = useQuery(api.leads.stats) || { total: 0, today: 0 };
-  const publicUrl = "https://craftsilicon.netlify.app/";
 
   const filteredLeads = leads.filter(
     (lead) =>
       lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.organisation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.email.toLowerCase().includes(searchTerm.toLowerCase()),
+      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.productInterest?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const exportCSV = async () => {
-    const headers = ["Name", "Organisation", "Email", "Phone", "Time", "Date"];
+    const headers = ["Name", "Organisation", "Email", "Phone", "Interest", "Status", "Time", "Date"];
     const rows = leads.map((lead) => {
       const d = new Date(lead.createdAt);
       return [
         `"${lead.name.replace(/"/g, '""')}"`,
         `"${lead.organisation.replace(/"/g, '""')}"`,
-        lead.email,
-        lead.phone,
-        d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        d.toLocaleDateString(),
+        `"${lead.email}"`,
+        `"${lead.phone}"`,
+        `"${lead.productInterest || "general"}"`,
+        `"${lead.status}"`,
+        `"${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}"`,
+        `"${d.toLocaleDateString()}"`,
       ].join(",");
     });
 
@@ -55,7 +100,7 @@ function AdminDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `craft-silicon-osr-leads-${Date.now()}.csv`);
+    link.setAttribute("download", `craft-silicon-leads-${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -69,7 +114,6 @@ function AdminDashboard() {
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
-      // Create padding block
       const padding = 32;
       canvas.width = img.width + padding * 2;
       canvas.height = img.height + padding * 2;
@@ -84,74 +128,70 @@ function AdminDashboard() {
         downloadLink.click();
       }
     };
-    // Ensure all characters properly encode over btoa
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   return (
     <div className="min-h-[100dvh] bg-[var(--color-cs-light-bg)] pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between bg-[var(--color-cs-navy-mid)] px-[1.75rem] py-[1.1rem]">
-        <div className="flex items-baseline gap-4">
-          <h1 className="text-[15px] font-medium text-white">Booth Leads</h1>
-          <span className="text-[12px] font-normal text-[var(--color-cs-blue-dark)]">
+      <header className="sticky top-0 z-40 flex items-center justify-between bg-[var(--color-cs-navy-mid)] px-4 py-3 md:px-8 md:py-4">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-[14px] font-semibold text-white md:text-[16px]">Booth Leads</h1>
+          <span className="hidden text-[12px] text-[var(--color-cs-blue-dark)] sm:inline">
             {stats.total} total
           </span>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 md:gap-3">
           <button
             onClick={() => setShowQR(true)}
-            className="flex items-center gap-2 rounded-[6px] border border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.1)] px-[15px] py-[7px] text-[12px] font-medium text-white transition hover:bg-[rgba(255,255,255,0.2)]"
+            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-medium text-white transition hover:bg-white/10 md:px-4"
           >
-            <QrCode size={14} /> Get QR Code
+            <QrCode size={14} /> <span className="hidden md:inline">Get QR</span>
           </button>
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 rounded-[6px] border border-[rgba(10,106,226,0.35)] bg-[rgba(10,106,226,0.12)] px-[15px] py-[7px] text-[12px] font-medium text-[var(--color-cs-blue-dark)] transition hover:bg-[rgba(10,106,226,0.2)]"
+            className="flex items-center gap-2 rounded-lg bg-[var(--color-cs-blue)] px-3 py-2 text-[12px] font-medium text-white transition hover:bg-[var(--color-cs-blue-dark)] md:px-4"
           >
-            <Download size={14} /> Export CSV
+            <Download size={14} /> <span className="hidden md:inline">Export</span>
           </button>
           <button
             onClick={() => signOut()}
-            className="flex items-center gap-2 rounded-[6px] border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.05)] px-[15px] py-[7px] text-[12px] font-normal text-[rgba(255,255,255,0.45)] transition hover:bg-[rgba(255,255,255,0.1)] hover:text-white"
+            className="flex items-center gap-2 rounded-lg bg-white/5 p-2 text-white/40 transition hover:bg-white/10 hover:text-white md:px-4 md:py-2 md:text-[12px]"
           >
-            <LogOut size={14} /> Sign out
+            <LogOut size={14} /> <span className="hidden md:inline">Sign out</span>
           </button>
         </div>
       </header>
 
-      {/* QR Code Modal Overlay */}
+      {/* QR Code Modal */}
       {showQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#071426]/80 px-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-[420px] rounded-[16px] bg-white p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#071426]/90 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-[400px] rounded-2xl bg-white p-6 shadow-2xl md:p-8">
             <button
               onClick={() => setShowQR(false)}
-              className="absolute right-4 top-4 text-[#071426]/40 transition hover:text-[#071426]"
+              className="absolute right-4 top-4 text-[#071426]/40 hover:text-[#071426]"
             >
               <X size={20} />
             </button>
             <div className="flex flex-col items-center text-center">
-              <h2 className="text-[20px] font-medium tracking-[-0.5px] text-[#071426]">
-                Booth QR Code
-              </h2>
+              <h2 className="text-[20px] font-bold text-[#071426]">Booth QR Code</h2>
               <p className="mt-2 text-[14px] text-[#071426]/60">
-                Visitors can scan this code to access the lead capture form directly on their devices.
+                Visitors scan this to access your lead form.
               </p>
-              <div className="mt-8 overflow-hidden rounded-[12px] border border-[#071426]/10 bg-white p-6 shadow-sm">
+              <div className="mt-6 rounded-xl border border-[#071426]/10 p-4 bg-white">
                 <QRCodeSVG
                   id="booth-qr-code"
-                  value={publicUrl}
+                  value={CONFIG.PUBLIC_URL}
                   size={200}
                   level="H"
-                  includeMargin={false}
                   fgColor="#071426"
                 />
               </div>
               <button
                 onClick={downloadQR}
-                className="mt-8 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--color-cs-blue)] py-[14px] text-[15px] font-medium text-white shadow-md transition-all hover:bg-[var(--color-cs-blue-dark)] hover:-translate-y-[1px]"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-cs-blue)] py-3 text-[15px] font-semibold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Download size={18} /> Download High-Res QR
+                <Download size={18} /> Download QR
               </button>
             </div>
           </div>
@@ -159,108 +199,161 @@ function AdminDashboard() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto mt-8 w-full max-w-[1100px] px-6 lg:px-8">
-        {/* Stats Row */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-[12px]">
-          <div className="rounded-[10px] border-[0.5px] border-[var(--color-cs-light-border)] bg-[var(--color-cs-light-surface)] px-[1.25rem] py-[1.1rem] shadow-[0_2px_16px_rgba(7,20,38,0.10)]">
-            <h3 className="text-[10px] font-medium uppercase tracking-[0.08em] text-[rgba(7,20,38,0.45)]">
-              Total Leads
-            </h3>
-            <p className="mt-1 text-[28px] font-medium tracking-[-0.5px] text-[#071426]" style={{ fontVariantNumeric: "tabular-nums" }}>
-              {stats.total}
-            </p>
+      <main className="mx-auto mt-6 w-full max-w-[1200px] px-4 md:mt-8 md:px-8">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="rounded-xl border border-[var(--color-cs-light-border)] bg-white p-4 shadow-sm md:p-6 text-center md:text-left">
+            <span className="text-[10px] uppercase tracking-wider text-[#071426]/40">Total Leads</span>
+            <div className="mt-1 flex items-baseline justify-center md:justify-start gap-2">
+              <span className="text-2xl font-bold text-[#071426] md:text-3xl">{stats.total}</span>
+              <Building2 className="text-[var(--color-cs-blue)]/20" size={16} />
+            </div>
           </div>
-          <div className="rounded-[10px] border-[0.5px] border-[var(--color-cs-light-border)] bg-[var(--color-cs-light-surface)] px-[1.25rem] py-[1.1rem] shadow-[0_2px_16px_rgba(7,20,38,0.10)]">
-            <h3 className="text-[10px] font-medium uppercase tracking-[0.08em] text-[rgba(7,20,38,0.45)]">
-              Today
-            </h3>
-            <p className="mt-1 text-[28px] font-medium tracking-[-0.5px] text-[#071426]" style={{ fontVariantNumeric: "tabular-nums" }}>
-              {stats.today}
-            </p>
+          <div className="rounded-xl border border-[var(--color-cs-light-border)] bg-white p-4 shadow-sm md:p-6 text-center md:text-left">
+            <span className="text-[10px] uppercase tracking-wider text-[#071426]/40">Today</span>
+            <div className="mt-1 flex items-baseline justify-center md:justify-start gap-2">
+              <span className="text-2xl font-bold text-[#071426] md:text-3xl">{stats.today}</span>
+              <Clock className="text-amber-500/20" size={16} />
+            </div>
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mt-[32px] w-full max-w-[400px]">
-          <Search
-            className="absolute left-[14px] top-1/2 -translate-y-1/2 text-[rgba(7,20,38,0.35)]"
-            size={16}
-          />
-          <input
-            type="text"
-            placeholder="Search name, organisation, email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-[8px] border-[0.5px] border-[rgba(7,20,38,0.15)] bg-white py-[10px] pl-[40px] pr-[14px] text-[14px] text-[#071426] placeholder-[rgba(7,20,38,0.35)] outline-none transition-colors duration-160 ease-out focus:border-[var(--color-cs-blue)]"
-          />
+        {/* Filters */}
+        <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#071426]/30" size={16} />
+            <input
+              type="text"
+              placeholder="Search leads..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-xl border border-[#071426]/10 bg-white py-3 pl-10 pr-4 text-[14px] text-[#071426] outline-none transition-colors focus:border-[var(--color-cs-blue)]"
+            />
+          </div>
         </div>
 
-        {/* Table */}
-        <div className="mt-6 w-full overflow-x-auto rounded-[10px] border-[0.5px] border-[var(--color-cs-light-border)] bg-white shadow-[0_4px_24px_rgba(7,20,38,0.15)]">
-          <div className="min-w-[560px]">
-            <table className="w-full text-left">
-              <thead>
-                <tr>
-                  <th className="border-b-[0.5px] border-[rgba(7,20,38,0.08)] px-[14px] py-[11px] text-[10px] font-medium uppercase tracking-[0.07em] text-[rgba(7,20,38,0.40)]">
-                    Name
-                  </th>
-                  <th className="border-b-[0.5px] border-[rgba(7,20,38,0.08)] px-[14px] py-[11px] text-[10px] font-medium uppercase tracking-[0.07em] text-[rgba(7,20,38,0.40)]">
-                    Organisation
-                  </th>
-                  <th className="border-b-[0.5px] border-[rgba(7,20,38,0.08)] px-[14px] py-[11px] text-[10px] font-medium uppercase tracking-[0.07em] text-[rgba(7,20,38,0.40)]">
-                    Email
-                  </th>
-                  <th className="border-b-[0.5px] border-[rgba(7,20,38,0.08)] px-[14px] py-[11px] text-[10px] font-medium uppercase tracking-[0.07em] text-[rgba(7,20,38,0.40)]">
-                    Phone
-                  </th>
-                  <th className="border-b-[0.5px] border-[rgba(7,20,38,0.08)] px-[14px] py-[11px] text-[10px] font-medium uppercase tracking-[0.07em] text-[rgba(7,20,38,0.40)]">
-                    Time
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLeads.map((lead, idx) => {
-                  const d = new Date(lead.createdAt);
-                  const isRecent = Date.now() - lead.createdAt < 30 * 60 * 1000;
-                  return (
-                    <tr
-                      key={lead._id || idx}
-                      className="group border-b-[0.5px] border-[rgba(7,20,38,0.05)] transition-colors duration-100 last:border-b-0 hover:bg-[#F7F9FC]"
-                    >
-                      <td className="px-[14px] py-[13px] text-[15px] font-medium text-[var(--text-light-1)]">
-                        {lead.name}
-                      </td>
-                      <td className="px-[14px] py-[13px] text-[15px] font-bold text-[var(--text-light-1)]">
-                        {lead.organisation}
-                      </td>
-                      <td className="px-[14px] py-[13px] text-[13px] text-[rgba(7,20,38,0.60)]">
-                        {lead.email}
-                      </td>
-                      <td className="px-[14px] py-[13px] text-[13px] text-[rgba(7,20,38,0.60)]">
-                        {lead.phone}
-                      </td>
-                      <td className="relative px-[14px] py-[13px] text-[13px] text-[rgba(7,20,38,0.60)]">
-                        {d.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                        {isRecent && (
-                          <span className="absolute right-4 top-1/2 h-[6px] w-[6px] -translate-y-1/2 rounded-full bg-amber-500" />
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {filteredLeads.length === 0 && (
-              <div className="px-6 py-12 text-center text-[14px] text-[rgba(7,20,38,0.50)]">
-                No leads found. Share the QR code!
+        {/* Mobile View: Cards */}
+        <div className="mt-6 flex flex-col gap-4 md:hidden">
+          {filteredLeads.map((lead) => {
+            const d = new Date(lead.createdAt);
+            return (
+              <div key={lead._id} className="rounded-2xl border border-[var(--color-cs-light-border)] bg-white p-5 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-bold text-[#071426]">{lead.name}</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5 text-[12px] text-[#071426]/50">
+                      <Building2 size={12} />
+                      <span className="font-semibold">{lead.organisation}</span>
+                    </div>
+                  </div>
+                  <select 
+                    value={lead.status}
+                    onChange={(e) => updateStatus({ id: lead._id, status: e.target.value })}
+                    className={`rounded-lg border-none bg-[var(--color-cs-light-bg)] px-2 py-1 text-[11px] font-bold outline-none ring-1 ring-black/5 ${
+                      lead.status === "new" ? "text-amber-600" : 
+                      lead.status === "contacted" ? "text-blue-600" : 
+                      lead.status === "qualified" ? "text-green-600" : 
+                      "text-gray-500"
+                    }`}
+                  >
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="qualified">Qualified</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2 mt-4 pt-4 border-t border-[var(--color-cs-light-bg)]">
+                  <div className="flex items-center gap-2 text-[13px] text-[#071426]/60">
+                    <Mail size={14} className="text-[var(--color-cs-blue)]/40" />
+                    <span className="truncate">{lead.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#071426]/60">
+                    <Globe size={14} className="text-[var(--color-cs-blue)]/40" />
+                    <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-600">
+                      {lead.productInterest?.replace("_", " ") || "general"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[12px] text-[#071426]/30 mt-2">
+                    <Clock size={12} />
+                    <span>{d.toLocaleDateString()} at {d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+            );
+          })}
         </div>
+
+        {/* Desktop View: Table */}
+        <div className="mt-6 hidden w-full overflow-hidden rounded-2xl border border-[var(--color-cs-light-border)] bg-white shadow-sm md:block">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-[var(--color-cs-light-bg)]/50">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[#071426]/40">Name</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[#071426]/40">Organisation</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[#071426]/40">Interest</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[#071426]/40">Status</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[#071426]/40">Contact</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[#071426]/40 text-right">Time</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--color-cs-light-bg)]">
+              {filteredLeads.map((lead) => {
+                const d = new Date(lead.createdAt);
+                return (
+                  <tr key={lead._id} className="group hover:bg-[var(--color-cs-light-bg)]/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-[14px] font-bold text-[#071426]">{lead.name}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-[14px] text-[#071426]/70">{lead.organisation}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-600 ring-1 ring-blue-100">
+                        {lead.productInterest?.replace("_", " ") || "general"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select 
+                        value={lead.status}
+                        onChange={(e) => updateStatus({ id: lead._id, status: e.target.value })}
+                        className={`rounded-lg border-none bg-transparent text-[13px] font-bold outline-none focus:ring-2 focus:ring-[var(--color-cs-blue)]/20 ${
+                          lead.status === "new" ? "text-amber-600" : 
+                          lead.status === "contacted" ? "text-blue-600" : 
+                          lead.status === "qualified" ? "text-green-600" : 
+                          "text-gray-500"
+                        }`}
+                      >
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="archived">Archived</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] text-[#071426]">{lead.email}</span>
+                        <span className="text-[11px] text-[#071426]/30">{lead.phone}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-[12px] text-[#071426]/40">{d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {filteredLeads.length === 0 && (
+          <div className="mt-12 text-center text-[#071426]/40">
+            <Search className="mx-auto mb-4 opacity-20" size={48} />
+            <p>No leads found matching your search.</p>
+          </div>
+        )}
       </main>
     </div>
   );
 }
+
