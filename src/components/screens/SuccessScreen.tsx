@@ -88,9 +88,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ flow }) => {
         <PrecisionButton 
           className="w-full" 
           onClick={() => {
-            // Placeholder for download action
-            alert("Downloading product brochures...");
-            // In a real app, this could be: window.open('/path-to-brochure.pdf', '_blank');
+            window.open("https://products.cspl-uat.com/products.html", "_blank");
           }}
         >
           {screen.content.cta}
