@@ -26,14 +26,14 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
         >
           <ChevronLeft size={10} /> BACK
         </button>
-        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
+        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
           {screen.content.step_label}
         </div>
         <ScreenHeadline
           screenKey={`screen-${screen.id}`}
           full={flow.interpolate(screen.content.question || screen.content.headline)}
           name={firstName}
-          subtext={screen.id === "organisation" ? screen.content.subtext : "One follow-up. Relevant to your county's situation. No noise."}
+          subtext={screen.content.subtext || ""}
         />
       </div>
 

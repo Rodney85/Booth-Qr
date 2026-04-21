@@ -25,7 +25,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
             <ChevronLeft size={10} /> BACK
           </button>
         )}
-        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
+        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
           {screen.content.step_label}
         </div>
         
@@ -33,14 +33,14 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
           <ScreenHeadline
             screenKey="screen-name"
             full={flow.interpolate(screen.content.question || screen.content.headline)}
-            subtext="Counties leave revenue on the table every day — because systems don't talk to each other. We fix that. Let's start with your name."
+            subtext={screen.content.subtext || ""}
           />
         ) : (
           <ScreenHeadline
             screenKey="screen-org"
             full={flow.interpolate(screen.content.question || screen.content.headline)}
             name={firstName}
-            subtext="Knowing your organisation tells us which platform is most relevant — and who on our team should reach out after the conference."
+            subtext={screen.content.subtext || ""}
           />
         )}
       </div>
