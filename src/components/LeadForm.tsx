@@ -1,4 +1,4 @@
-// Interactive Concierge Lead Form
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useConversationalFlow } from "@/lib/useConversationalFlow";
 import { SplashScreen } from "./SplashScreen";
@@ -13,6 +13,8 @@ import { api } from "../../convex/_generated/api";
 export default function LeadForm() {
   const flow = useConversationalFlow();
   const submitLead = useMutation(api.leads.submit);
+  const [isSubmitting, setIsSubmitting] = (import.meta as any).env?.DEV ? [false, () => {}] : (useState(false) as any); // Fallback if state is needed
+  const [error, setError] = useState<string | null>(null);
 
   const handleFinish = async () => {
     try {
@@ -35,6 +37,11 @@ export default function LeadForm() {
       flow.goToStep("success");
     } catch (err) {
       console.error("Submission failed", err);
+      if (err instanceof Error && err.message.includes("ALREADY_REGISTERED")) {
+        setError("You are already registered with this email or phone number.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -103,6 +110,26 @@ export default function LeadForm() {
         >
           {renderStep()}
         </motion.div>
+      </AnimatePresence>
+
+      {/* Error Toast/Alert */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-[#EE4444] text-white p-4 rounded-2xl shadow-xl flex items-center justify-between border border-white/20"
+          >
+            <div className="text-[14px] font-medium">{error}</div>
+            <button 
+              onClick={() => setError(null)}
+              className="ml-4 text-white/60 hover:text-white"
+            >
+              Close
+            </button>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

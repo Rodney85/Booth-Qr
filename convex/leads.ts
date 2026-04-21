@@ -11,6 +11,26 @@ export const submit = mutation({
     productInterest: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Check if email already exists
+    const existingEmail = await ctx.db
+      .query("leads")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+    
+    if (existingEmail) {
+      throw new Error("ALREADY_REGISTERED");
+    }
+
+    // Check if phone already exists
+    const existingPhone = await ctx.db
+      .query("leads")
+      .withIndex("by_phone", (q) => q.eq("phone", args.phone))
+      .first();
+
+    if (existingPhone) {
+      throw new Error("ALREADY_REGISTERED");
+    }
+
     return await ctx.db.insert("leads", {
       ...args,
       status: "new",
@@ -90,5 +110,30 @@ export const exportAll = query({
       .withIndex("by_createdAt")
       .order("desc")
       .collect();
+  },
+});
+
+export const checkDuplicate = query({
+  args: {
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const result = { email: false, phone: false };
+    if (args.email) {
+      const existingEmail = await ctx.db
+        .query("leads")
+        .withIndex("by_email", (q) => q.eq("email", args.email!))
+        .first();
+      if (existingEmail) result.email = true;
+    }
+    if (args.phone) {
+      const existingPhone = await ctx.db
+        .query("leads")
+        .withIndex("by_phone", (q) => q.eq("phone", args.phone!))
+        .first();
+      if (existingPhone) result.phone = true;
+    }
+    return result;
   },
 });
