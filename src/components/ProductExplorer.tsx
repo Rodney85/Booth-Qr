@@ -16,13 +16,18 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
 
   if (isDetail) {
     return (
-      <div className="flex flex-1 flex-col px-6 pt-10">
-        <button 
-          onClick={() => flow.goToStep("product_list")}
-          className="mb-8 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
-        >
-          <ChevronLeft size={10} /> BACK TO SOLUTIONS
-        </button>
+      <div className="flex flex-1 flex-col px-6 pt-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
+            SOLUTION PREVIEW
+          </div>
+          <button 
+            onClick={() => flow.goToStep("product_list")}
+            className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/45 transition hover:bg-white/10 hover:text-white"
+          >
+            <ChevronLeft size={10} /> BACK
+          </button>
+        </div>
 
         <div className="flex flex-col gap-6">
           <div className="aspect-[16/10] w-full rounded-2xl bg-[#132952] border border-white/5 flex items-center justify-center">
@@ -59,16 +64,18 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-10">
-      <div className="flex flex-col gap-1">
-        <button 
-          onClick={() => flow.goBack()}
-          className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
-        >
-          <ChevronLeft size={10} /> BACK
-        </button>
-        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
-          {screen.content.step_label}
+    <div className="flex flex-1 flex-col px-6 pt-6">
+      <div className="flex flex-col gap-0">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
+            {screen.content.step_label}
+          </div>
+          <button 
+            onClick={() => flow.goBack()}
+            className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/45 transition hover:bg-white/10 hover:text-white"
+          >
+            <ChevronLeft size={10} /> BACK
+          </button>
         </div>
         <ScreenHeadline
           screenKey="screen-products"

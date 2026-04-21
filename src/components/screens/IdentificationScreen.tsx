@@ -15,18 +15,20 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
   const firstName = flow.formData.name ? (flow.formData.name as string).split(" ")[0] : "";
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-10">
-      <div className="flex flex-col gap-1">
-        {!flow.isFirstStep && (
-          <button 
-            onClick={() => flow.goBack()}
-            className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
-          >
-            <ChevronLeft size={10} /> BACK
-          </button>
-        )}
-        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
-          {screen.content.step_label}
+    <div className="flex flex-1 flex-col px-6 pt-6">
+      <div className="flex flex-col gap-0">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
+            {screen.content.step_label}
+          </div>
+          {!flow.isFirstStep && (
+            <button 
+              onClick={() => flow.goBack()}
+              className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/45 transition hover:bg-white/10 hover:text-white"
+            >
+              <ChevronLeft size={10} /> BACK
+            </button>
+          )}
         </div>
         
         {id === "name" ? (
@@ -45,7 +47,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
         )}
       </div>
 
-      <div className="mt-14 flex flex-col gap-10">
+      <div className="mt-10 flex flex-col gap-10">
         <div className="flex flex-col gap-3">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
             {screen.content.label}

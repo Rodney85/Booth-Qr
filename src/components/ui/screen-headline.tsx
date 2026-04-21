@@ -153,7 +153,7 @@ export function ScreenHeadline({
   if (shouldReduceMotion) {
     return (
       <div key={screenKey}>
-        <h2 className="mb-2 text-[32px] font-bold leading-[1.12] tracking-[-0.3px] text-white">
+        <h2 className="mb-1 text-[32px] font-bold leading-[1.12] tracking-[-0.3px] text-white">
           {full || (
             <>
               {before}
@@ -162,7 +162,7 @@ export function ScreenHeadline({
             </>
           )}
         </h2>
-        <p className="mt-3 text-[16px] font-normal leading-[1.55] text-white/45">
+        <p className="mt-2 text-[16px] font-normal leading-[1.55] text-white/45">
           {subtext}
         </p>
       </div>
@@ -172,7 +172,7 @@ export function ScreenHeadline({
   return (
     <div key={screenKey}>
       {/* Headline */}
-      <h2 className="mb-3 text-[32px] font-bold leading-[1.15] tracking-[-0.3px] text-white">
+      <h2 className="mb-1 text-[32px] font-bold leading-[1.15] tracking-[-0.3px] text-white">
         {full ? (
           renderMultiLine(full, headlineVariants)
         ) : (
@@ -198,7 +198,7 @@ export function ScreenHeadline({
 
       {/* Subtext — fades in after headline */}
       <motion.p
-        className="mt-3 text-[16px] font-normal leading-[1.55] text-white/45"
+        className="mt-2 text-[16px] font-normal leading-[1.55] text-white/45"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.32, delay: 0.65, ease: [0.25, 0.1, 0.25, 1] as BezierDefinition }}

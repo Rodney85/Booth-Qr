@@ -37,7 +37,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ flow }) => {
     : selectedOptions.map(o => o.feedback?.tag || o.label);
 
   return (
-    <div className="flex flex-1 flex-col items-center px-8 pt-12 text-center pb-32">
+    <div className="flex flex-1 flex-col items-center px-8 pt-6 text-center pb-32">
       <motion.div 
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

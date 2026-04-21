@@ -18,16 +18,18 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
   const isFilled = screen.content.fields?.every(f => !!flow.formData[f.id]) || false;
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-10">
-      <div className="flex flex-col gap-1">
-        <button 
-          onClick={() => flow.goBack()}
-          className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
-        >
-          <ChevronLeft size={10} /> BACK
-        </button>
-        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
-          {screen.content.step_label}
+    <div className="flex flex-1 flex-col px-6 pt-6">
+      <div className="flex flex-col gap-0">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
+            {screen.content.step_label}
+          </div>
+          <button 
+            onClick={() => flow.goBack()}
+            className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/45 transition hover:bg-white/10 hover:text-white"
+          >
+            <ChevronLeft size={10} /> BACK
+          </button>
         </div>
         <ScreenHeadline
           screenKey={`screen-${screen.id}`}
@@ -37,7 +39,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
         />
       </div>
 
-      <div className="mt-14 flex flex-col gap-10">
+      <div className="mt-10 flex flex-col gap-10">
         {/* Guide moved above inputs */}
         {screen.content.proof_card && (
           <ContextGuide 
