@@ -1,8 +1,9 @@
 import React from "react";
-import { ChevronLeft, FileText } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { PrecisionInput } from "@/components/ui/PrecisionInput";
 import { PrecisionButton } from "@/components/ui/PrecisionButton";
 import { ScreenHeadline } from "@/components/ui/screen-headline";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 import type { FlowState } from "@/types/flow";
 
 interface ContactScreenProps {
@@ -12,6 +13,9 @@ interface ContactScreenProps {
 export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
   const screen = flow.currentScreen;
   const firstName = flow.formData.name ? (flow.formData.name as string).split(" ")[0] : "";
+
+  // Check if all required fields in this step are filled
+  const isFilled = screen.content.fields?.every(f => !!flow.formData[f.id]) || false;
 
   return (
     <div className="flex flex-1 flex-col px-6 pt-10">
@@ -26,19 +30,26 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
           {screen.content.step_label}
         </div>
         <ScreenHeadline
-          screenKey="screen-contact"
-          before="Where should we send your brief, "
+          screenKey={`screen-${screen.id}`}
+          full={flow.interpolate(screen.content.question || screen.content.headline)}
           name={firstName}
-          after="?"
-          subtext="One follow-up. Relevant to your county's situation. No noise."
+          subtext={screen.id === "organisation" ? screen.content.subtext : "One follow-up. Relevant to your county's situation. No noise."}
         />
       </div>
 
-      <div className="mt-10 flex flex-col gap-8">
-        <div className="flex flex-col gap-6">
+      <div className="mt-14 flex flex-col gap-10">
+        {/* Guide moved above inputs */}
+        {screen.content.proof_card && (
+          <ContextGuide 
+            title={screen.content.proof_card.title}
+            text={screen.content.proof_card.text}
+          />
+        )}
+
+        <div className="flex flex-col gap-8">
           {screen.content.fields?.map((f) => (
-            <div key={f.id} className="flex flex-col gap-2">
-              <div className="text-[10px] font-medium uppercase tracking-[0.10em] text-white/35">
+            <div key={f.id} className="flex flex-col gap-3">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
                 {f.label}
               </div>
               <PrecisionInput
@@ -46,36 +57,26 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
                 placeholder={f.placeholder}
                 value={(flow.formData[f.id] as string) || ""}
                 onChange={(e) => flow.updateFormData({ [f.id]: e.target.value })}
-                className="text-[16px] font-normal text-white placeholder:text-white/20"
+                className="text-[18px] font-normal text-white placeholder:text-white/20"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && isFilled) {
+                    flow.goToNext();
+                  }
+                }}
               />
             </div>
           ))}
         </div>
-
-        {/* Proof Row */}
-        <div className="flex items-center gap-3 rounded-xl border border-[#3D94F5]/10 bg-[#3D94F5]/5 p-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3D94F5]/20 text-[#3D94F5]">
-            <FileText size={16} />
-          </div>
-          <div className="flex flex-col">
-            <div className="text-[13px] font-bold leading-[1.2] text-white">
-              {screen.content.proof_card?.title || "Personalised to your county"}
-            </div>
-            <div className="text-[11px] font-normal leading-[1.45] text-white/38">
-              {screen.content.proof_card?.text || "Includes deployment examples and product modules"}
-            </div>
-          </div>
-        </div>
+      </div>
 
       <div className="mt-auto pb-10">
         <PrecisionButton 
-          disabled={!flow.formData.email || !flow.formData.phone}
+          disabled={!isFilled}
           onClick={() => flow.goToNext()}
           className="w-full"
         >
           {screen.content.cta}
         </PrecisionButton>
-      </div>
       </div>
     </div>
   );

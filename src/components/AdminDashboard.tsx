@@ -80,12 +80,13 @@ function AdminDashboard() {
   );
 
   const exportCSV = async () => {
-    const headers = ["Name", "Organisation", "Email", "Phone", "Interest", "Status", "Time", "Date"];
+    const headers = ["Name", "Organisation", "Role", "Email", "Phone", "Interest", "Status", "Time", "Date"];
     const rows = leads.map((lead) => {
       const d = new Date(lead.createdAt);
       return [
         `"${lead.name.replace(/"/g, '""')}"`,
         `"${lead.organisation.replace(/"/g, '""')}"`,
+        `"${(lead as any).role?.replace(/"/g, '""') || ""}"`,
         `"${lead.email}"`,
         `"${lead.phone}"`,
         `"${lead.productInterest || "general"}"`,
@@ -241,9 +242,14 @@ function AdminDashboard() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="font-bold text-[#071426]">{lead.name}</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5 text-[12px] text-[#071426]/50">
-                      <Building2 size={12} />
-                      <span className="font-semibold">{lead.organisation}</span>
+                    <div className="flex flex-col gap-0.5 mt-1 text-[12px] text-[#071426]/50">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 size={12} />
+                        <span className="font-semibold">{lead.organisation}</span>
+                      </div>
+                      <div className="text-[11px] font-medium pl-4.5 italic">
+                        {(lead as any).role}
+                      </div>
                     </div>
                   </div>
                   <select 
@@ -306,7 +312,10 @@ function AdminDashboard() {
                       <span className="text-[14px] font-bold text-[#071426]">{lead.name}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[14px] text-[#071426]/70">{lead.organisation}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[14px] text-[#071426]/70">{lead.organisation}</span>
+                        <span className="text-[11px] text-[#071426]/40 italic">{(lead as any).role}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-600 ring-1 ring-blue-100">

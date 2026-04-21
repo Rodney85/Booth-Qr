@@ -63,9 +63,8 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ flow }) => {
 
       <ScreenHeadline
         screenKey="screen-success"
-        before="You're connected, "
+        full={flow.interpolate(screen.content.headline)}
         name={firstName}
-        after="."
         subtext={flow.interpolate(displaySubtext)}
       />
 

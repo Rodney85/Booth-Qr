@@ -33,10 +33,10 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
           </div>
           
           <div className="flex flex-col gap-2">
-            <h2 className="text-[26px] font-bold tracking-[-0.03em] text-white">
+            <h2 className="text-[32px] font-bold tracking-[-0.03em] leading-[1.15] text-white">
               {flow.interpolate(screen.content.header)}
             </h2>
-            <p className="text-[14px] leading-[1.6] text-white/50">
+            <p className="text-[16px] leading-[1.6] text-white/50">
                {screen.content.overview}
             </p>
           </div>
@@ -72,10 +72,9 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
         </div>
         <ScreenHeadline
           screenKey="screen-products"
-          before="Which area sparks your interest, "
+          full={flow.interpolate(screen.content.question || screen.content.headline)}
           name={firstName}
-          after="?"
-          subtext="Select one. Your brief will be built around it."
+          subtext="Select one or more. Your brief will be built around them."
         />
       </div>
 

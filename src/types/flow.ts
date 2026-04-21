@@ -80,7 +80,7 @@ export interface FlowState {
   isTransitioning: boolean;
   toggleProductSelect: (productId: string) => void;
   selectedProductIds: string[];
-  interpolate: (text: string | undefined) => string;
+  interpolate: <T extends string | string[] | undefined>(text: T) => T;
   isFirstStep: boolean;
   isLastStep: boolean;
   screens: Screen[];

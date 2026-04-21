@@ -3,13 +3,13 @@ import { TextEffect } from '@/components/ui/text-effect';
 
 interface ScreenHeadlineProps {
   /** The part of the headline BEFORE the name. e.g. "Nice to meet you, " */
-  before?: string;
+  before?: string | string[];
   /** The personalised name to highlight in brand blue. e.g. "Garvin" */
   name?: string;
   /** The part of the headline AFTER the name. e.g. ". Where do you work?" */
-  after?: string;
+  after?: string | string[];
   /** For screens with no name injection, pass the full headline here */
-  full?: string;
+  full?: string | string[];
   /** The subtext paragraph below the headline */
   subtext: string;
   /** Unique key — must change on every screen transition to retrigger animation */
@@ -25,6 +25,70 @@ export function ScreenHeadline({
   screenKey,
 }: ScreenHeadlineProps) {
   const shouldReduceMotion = useReducedMotion();
+
+  const renderMultiLine = (content: string | string[], variants: any, delay: number = 0) => {
+    if (!content) return null;
+    const lines = Array.isArray(content) ? content : [content];
+    
+    return lines.map((line, i) => {
+      // Check if this line contains the name to color it
+      const hasName = name && line.includes(name);
+      
+      if (hasName && name) {
+        // Split the line by the name to isolate it for coloring
+        const parts = line.split(name);
+        return (
+          <div key={i} className="block">
+            {parts[0] && (
+              <TextEffect
+                per="word"
+                as="span"
+                variants={variants}
+                className="inline"
+                delay={delay + (i * 0.2)}
+              >
+                {parts[0]}
+              </TextEffect>
+            )}
+            <TextEffect
+              per="char"
+              as="span"
+              variants={nameVariants}
+              className="inline text-[#3D94F5]"
+              delay={delay + (i * 0.2) + (parts[0] ? parts[0].split(' ').length * 0.05 : 0)}
+            >
+              {name}
+            </TextEffect>
+            {parts[1] && (
+              <TextEffect
+                per="word"
+                as="span"
+                variants={variants}
+                className="inline"
+                delay={delay + (i * 0.2) + (parts[0]?.split(' ').length || 0) * 0.05 + (name.length * 0.04)}
+              >
+                {parts[1]}
+              </TextEffect>
+            )}
+          </div>
+        );
+      }
+
+      return (
+        <div key={i} className="block">
+          <TextEffect
+            per="word"
+            as="span"
+            variants={variants}
+            className="inline"
+            delay={delay + (i * 0.2)} // Stagger lines slightly
+          >
+            {line}
+          </TextEffect>
+        </div>
+      );
+    });
+  };
 
   // Custom blur+slide variant — words enter from slightly below with blur clearing
   const headlineVariants = {
@@ -89,7 +153,7 @@ export function ScreenHeadline({
   if (shouldReduceMotion) {
     return (
       <div key={screenKey}>
-        <h2 className="mb-2 text-[28px] font-bold leading-[1.12] tracking-[-0.3px] text-white">
+        <h2 className="mb-2 text-[32px] font-bold leading-[1.12] tracking-[-0.3px] text-white">
           {full || (
             <>
               {before}
@@ -98,7 +162,7 @@ export function ScreenHeadline({
             </>
           )}
         </h2>
-        <p className="mt-2 text-[14px] font-normal leading-[1.55] text-white/45">
+        <p className="mt-3 text-[16px] font-normal leading-[1.55] text-white/45">
           {subtext}
         </p>
       </div>
@@ -108,61 +172,36 @@ export function ScreenHeadline({
   return (
     <div key={screenKey}>
       {/* Headline */}
-      <h2 className="mb-2 text-[28px] font-bold leading-[1.12] tracking-[-0.3px] text-white">
+      <h2 className="mb-3 text-[32px] font-bold leading-[1.15] tracking-[-0.3px] text-white">
         {full ? (
-          // No name injection — animate the full string word by word
-          <TextEffect
-            per="word"
-            as="span"
-            variants={headlineVariants}
-            className="inline"
-          >
-            {full}
-          </TextEffect>
+          renderMultiLine(full, headlineVariants)
         ) : (
-          // Name injection — before + name (char) + after
-          <>
-            {before && (
-              <TextEffect
-                per="word"
-                as="span"
-                variants={headlineVariants}
-                className="inline"
-              >
-                {before}
-              </TextEffect>
-            )}
+          <div className="flex flex-col items-start gap-0">
+            {renderMultiLine(before || "", headlineVariants)}
             {name && (
-              <TextEffect
-                per="char"
-                as="span"
-                variants={nameVariants}
-                className="inline text-[#3D94F5]"
-              >
-                {name}
-              </TextEffect>
+              <div className="block">
+                <TextEffect
+                  per="char"
+                  as="span"
+                  variants={nameVariants}
+                  className="inline text-[#3D94F5]"
+                  delay={0.1}
+                >
+                  {name}
+                </TextEffect>
+              </div>
             )}
-            {after && (
-              <TextEffect
-                per="word"
-                as="span"
-                variants={headlineVariants}
-                className="inline"
-                delay={name ? (name.length * 0.04) + 0.1 : 0}
-              >
-                {after}
-              </TextEffect>
-            )}
-          </>
+            {renderMultiLine(after || "", headlineVariants, name ? (name.length * 0.04) + 0.1 : 0)}
+          </div>
         )}
       </h2>
 
       {/* Subtext — fades in after headline */}
       <motion.p
-        className="mt-2 text-[14px] font-normal leading-[1.55] text-white/45"
+        className="mt-3 text-[16px] font-normal leading-[1.55] text-white/45"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.32, delay: 0.45, ease: [0.25, 0.1, 0.25, 1] as BezierDefinition }}
+        transition={{ duration: 0.32, delay: 0.65, ease: [0.25, 0.1, 0.25, 1] as BezierDefinition }}
       >
         {subtext}
       </motion.p>

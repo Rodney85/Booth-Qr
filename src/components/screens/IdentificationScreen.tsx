@@ -32,23 +32,22 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
         {id === "name" ? (
           <ScreenHeadline
             screenKey="screen-name"
-            full="Welcome to the Craft Silicon booth."
+            full={flow.interpolate(screen.content.question || screen.content.headline)}
             subtext="Counties leave revenue on the table every day — because systems don't talk to each other. We fix that. Let's start with your name."
           />
         ) : (
           <ScreenHeadline
             screenKey="screen-org"
-            before="Nice to meet you, "
+            full={flow.interpolate(screen.content.question || screen.content.headline)}
             name={firstName}
-            after=". Where do you work?"
             subtext="Knowing your organisation tells us which platform is most relevant — and who on our team should reach out after the conference."
           />
         )}
       </div>
 
-      <div className="mt-10 flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
-          <div className="text-[10px] font-medium uppercase tracking-[0.10em] text-white/35">
+      <div className="mt-14 flex flex-col gap-10">
+        <div className="flex flex-col gap-3">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
             {screen.content.label}
           </div>
           <PrecisionInput
@@ -56,7 +55,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
             value={(flow.formData[id] as string) || ""}
             onChange={(e) => flow.updateFormData({ [id]: e.target.value })}
             autoFocus={id === "name"}
-            className="text-[16px] font-normal text-white placeholder:text-white/20"
+            className="text-[18px] font-normal text-white placeholder:text-white/20"
             onKeyDown={(e) => {
               if (e.key === "Enter" && flow.formData[id]) {
                 flow.goToNext();

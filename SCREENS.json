@@ -17,7 +17,7 @@
       "type": "conversational",
       "content": {
         "step_label": "STEP 1 OF 5",
-        "question": "Welcome to the Craft Silicon booth.",
+        "question": ["Welcome to,", "Craft Silicon booth."],
         "subtext": "Counties leave revenue on the table every day — because systems don't talk to each other. We fix that. Let's start with your name.",
         "label": "FULL NAME",
         "placeholder": "Enter your name...",
@@ -32,28 +32,28 @@
     },
     {
       "id": "organisation",
-      "type": "conversational",
+      "type": "conversational_group",
       "content": {
         "step_label": "STEP 2 OF 5",
-        "question": "Nice to meet you, {name}. Where do you work?",
-        "subtext": "Knowing your organisation tells us which platform is most relevant — and who on our team should reach out after the conference.",
-        "label": "ORGANISATION / ROLE",
-        "placeholder": "e.g. Homa Bay County / Director of Revenue",
-        "cta": "Next →",
-        "proof_points": [
-          { "title": "I work in revenue collection", "text": "OSR automation, land rates, SBP, market fees — reconciled to IFMIS. Live in 4 counties." },
-          { "title": "I work in HR or payroll", "text": "Biometric payroll, ghost-worker elimination, KDSP II KRA 2 aligned." },
-          { "title": "I work in health services", "text": "DHA-certified HMIS, SHA-integrated at point of care. Level 1–6 facility coverage." }
-        ]
-      },
-      "validation": { "required": true }
+        "question": ["Nice to meet you,", "{name}.", "Where do you work?"],
+        "subtext": "Knowing your organisation tells us which platform is most relevant — and who on our team should reach out.",
+        "fields": [
+          { "id": "organisation", "label": "ORGANISATION", "type": "text", "placeholder": "e.g. Homa Bay County" },
+          { "id": "role", "label": "YOUR ROLE", "type": "text", "placeholder": "Director of Revenue" }
+        ],
+        "proof_card": {
+          "title": "Solutions for every department",
+          "text": "Whether you're in Revenue, HR, or Health, we have a specialized module built for your county's specific needs."
+        },
+        "cta": "Next →"
+      }
     },
     {
       "id": "contact",
       "type": "conversational_group",
       "content": {
         "step_label": "STEP 3 OF 5",
-        "question": "Where should we send your brief, {name}?",
+        "question": ["Where should we send", "your brief,", "{name}?"],
         "subtext": "One follow-up. Relevant to your county's situation. No noise.",
         "fields": [
           { "id": "email", "label": "DIRECT EMAIL", "type": "email", "placeholder": "your@email.com" },
@@ -71,7 +71,7 @@
       "type": "selection_grid",
       "content": {
         "step_label": "STEP 4 OF 5",
-        "question": "Which area sparks your interest, {name}?",
+        "question": ["Which area sparks", "your interest,", "{name}?"],
         "subtext": "Select one or more. Your brief will be built around them.",
         "options": [
           { 
@@ -130,7 +130,7 @@
       "id": "success",
       "type": "confirmation",
       "content": {
-        "headline": "You're connected,<br>{name}.",
+        "headline": ["You're connected,", "{name}."],
         "subtext": "Your personalised brief is being prepared. A member of our team will reach out shortly to schedule your demo.",
         "multi_subtext": "Our specialist teams are preparing your tailored briefs based on your selected interests. Expect a message within 24 hours.",
         "skip_subtext": "A member of the Craft Silicon team will be in touch with a tailored brief within 24 hours.",

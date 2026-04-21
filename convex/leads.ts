@@ -7,6 +7,7 @@ export const submit = mutation({
     email: v.string(),
     phone: v.string(),
     organisation: v.string(),
+    role: v.optional(v.string()),
     productInterest: v.optional(v.string()),
   },
   handler: async (ctx, args) => {

@@ -29,6 +29,7 @@ export default function LeadForm() {
         email: currentData.email || "",
         phone: currentData.phone || "",
         organisation: currentData.organisation || "",
+        role: (currentData.role as string) || "",
         productInterest: interests,
       });
       flow.goToStep("success");
@@ -45,8 +46,8 @@ export default function LeadForm() {
       case "splash":
         return <SplashScreen headline={screen.content.headline || ""} subtext={screen.content.subtext || ""} />;
       case "name":
-      case "organisation":
         return <IdentificationScreen flow={flow} />;
+      case "organisation":
       case "contact":
         return <ContactScreen flow={flow} />;
       case "product_list":

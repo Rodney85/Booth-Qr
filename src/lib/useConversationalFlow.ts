@@ -13,24 +13,32 @@ export function useConversationalFlow(): FlowState {
   const screens = SCREENS_DATA.screens as Screen[];
   const currentScreen = screens[currentStepIndex];
 
-  const interpolate = (text: string | undefined): string => {
-    if (!text) return "";
-    let res = text;
-    if (res.includes("{name}")) {
-      const firstName = formData.name ? formData.name.trim().split(/\s+/)[0] : "there";
-      res = res.replace("{name}", firstName);
-    }
-    if (res.includes("{selected_product_name}")) {
-      const gridScreen = screens.find(s => s.id === "product_list");
-      if (selectedProductIds.length > 0) {
-        const firstProduct = gridScreen?.content.options?.find(o => o.id === selectedProductIds[0]);
-        const suffix = selectedProductIds.length > 1 ? ` and ${selectedProductIds.length - 1} more` : "";
-        res = res.replace("{selected_product_name}", (firstProduct?.label || "this product") + suffix);
-      } else {
-        res = res.replace("{selected_product_name}", "our innovations");
+  const interpolate = <T extends string | string[] | undefined>(text: T): T => {
+    if (!text) return text;
+    
+    const contextReplacer = (s: string) => {
+      let res = s;
+      if (res.includes("{name}")) {
+        const firstName = formData.name ? formData.name.trim().split(/\s+/)[0] : "there";
+        res = res.replace("{name}", firstName);
       }
+      if (res.includes("{selected_product_name}")) {
+        const gridScreen = screens.find(s => s.id === "product_list");
+        if (selectedProductIds.length > 0) {
+          const firstProduct = gridScreen?.content.options?.find(o => o.id === selectedProductIds[0]);
+          const suffix = selectedProductIds.length > 1 ? ` and ${selectedProductIds.length - 1} more` : "";
+          res = res.replace("{selected_product_name}", (firstProduct?.label || "this product") + suffix);
+        } else {
+          res = res.replace("{selected_product_name}", "our innovations");
+        }
+      }
+      return res;
+    };
+
+    if (Array.isArray(text)) {
+      return text.map(contextReplacer) as T;
     }
-    return res;
+    return contextReplacer(text as string) as T;
   };
 
   const updateFormData = useCallback((newData: Partial<FormData>) => {
