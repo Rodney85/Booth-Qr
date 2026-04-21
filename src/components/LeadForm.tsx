@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useConversationalFlow } from "@/lib/useConversationalFlow";
 import { SplashScreen } from "./SplashScreen";
@@ -13,7 +13,6 @@ import { api } from "../../convex/_generated/api";
 export default function LeadForm() {
   const flow = useConversationalFlow();
   const submitLead = useMutation(api.leads.submit);
-  const [isSubmitting, setIsSubmitting] = (import.meta as any).env?.DEV ? [false, () => {}] : (useState(false) as any); // Fallback if state is needed
   const [error, setError] = useState<string | null>(null);
 
   const handleFinish = async () => {
