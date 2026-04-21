@@ -18,7 +18,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
   const isFilled = screen.content.fields?.every(f => !!flow.formData[f.id]) || false;
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-6">
+    <div className="flex flex-1 flex-col px-6 pt-4">
       <div className="flex flex-col gap-0">
         <div className="flex items-center justify-between mb-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
@@ -39,7 +39,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
         />
       </div>
 
-      <div className="mt-10 flex flex-col gap-10">
+      <div className="mt-6 flex flex-col gap-4">
         {/* Guide moved above inputs */}
         {screen.content.proof_card && (
           <ContextGuide 
@@ -71,7 +71,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
         </div>
       </div>
 
-      <div className="mt-auto pt-16 pb-10">
+      <div className="mt-auto pt-4 pb-10">
         <PrecisionButton 
           disabled={!isFilled}
           onClick={() => flow.goToNext()}

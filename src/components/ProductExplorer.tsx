@@ -16,7 +16,7 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
 
   if (isDetail) {
     return (
-      <div className="flex flex-1 flex-col px-6 pt-6 pb-40">
+      <div className="flex flex-1 flex-col px-6 pt-4 pb-24">
         <div className="flex items-center justify-between mb-6">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
             SOLUTION PREVIEW
@@ -64,7 +64,7 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-6 pb-40">
+    <div className="flex flex-1 flex-col px-6 pt-4 pb-24">
       <div className="flex flex-col gap-0">
         <div className="flex items-center justify-between mb-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
@@ -127,7 +127,7 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
       </div>
 
       {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 px-6 pb-10 pt-4 bg-[#071426]/90 backdrop-blur-md border-t border-white/5">
+      <div className="fixed bottom-0 left-0 right-0 z-20 px-6 pb-4 pt-4 bg-[#071426]/90 backdrop-blur-md border-t border-white/5">
         {flow.selectedProductIds.length > 0 ? (
           <PrecisionButton 
             className="w-full" 

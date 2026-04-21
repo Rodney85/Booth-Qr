@@ -15,7 +15,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
   const firstName = flow.formData.name ? (flow.formData.name as string).split(" ")[0] : "";
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-6">
+    <div className="flex flex-1 flex-col px-6 pt-4">
       <div className="flex flex-col gap-0">
         <div className="flex items-center justify-between mb-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
@@ -47,7 +47,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
         )}
       </div>
 
-      <div className="mt-10 flex flex-col gap-10">
+      <div className="mt-6 flex flex-col gap-4">
         <div className="flex flex-col gap-3">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
             {screen.content.label}
@@ -84,7 +84,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
 
       </div>
 
-      <div className="mt-auto pt-16 pb-10">
+      <div className="mt-auto pt-4 pb-10">
         <PrecisionButton 
           disabled={!flow.formData[id]}
           onClick={() => flow.goToNext()}

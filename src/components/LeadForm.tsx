@@ -66,7 +66,7 @@ export default function LeadForm() {
     <div className="relative flex min-h-[100dvh] w-full flex-col bg-[#071426] font-inter overflow-x-hidden">
       {/* Progress Dots - Sticky at top */}
       {showProgress && (
-        <div className="flex gap-1.5 justify-center py-6 px-6 shrink-0 z-10 bg-[#071426]">
+        <div className="flex gap-1.5 justify-center py-4 px-6 shrink-0 z-10 bg-[#071426]">
           {flow.screens
             .filter(s => !["splash", "success"].includes(s.id))
             .map((s) => {
@@ -99,7 +99,7 @@ export default function LeadForm() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: flow.direction * -30 }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          className="flex flex-1 flex-col pb-10"
+          className="flex flex-1 flex-col overflow-hidden"
         >
           {renderStep()}
         </motion.div>

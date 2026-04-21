@@ -14,17 +14,17 @@ export const ContextGuide: React.FC<ContextGuideProps> = ({ title, text, items }
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="flex flex-col gap-4 rounded-2xl border border-[#3D94F5]/20 bg-[#3D94F5]/5 p-5"
+      className="flex flex-col gap-3 rounded-2xl border border-[#3D94F5]/20 bg-[#3D94F5]/5 p-4"
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3D94F5]/20 text-[#3D94F5]">
-          <Info size={20} />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#3D94F5]/20 text-[#3D94F5]">
+          <Info size={16} />
         </div>
         <div className="flex flex-col">
-          <div className="text-[14px] font-bold leading-tight text-white">
+          <div className="text-[13px] font-bold leading-tight text-white">
             {title}
           </div>
-          <div className="mt-1 text-[12px] font-normal leading-relaxed text-white/40">
+          <div className="mt-0.5 text-[11px] font-normal leading-normal text-white/40">
             {text}
           </div>
         </div>
