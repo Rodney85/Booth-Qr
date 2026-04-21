@@ -16,7 +16,7 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
 
   if (isDetail) {
     return (
-      <div className="flex flex-1 flex-col px-6 pt-6">
+      <div className="flex flex-1 flex-col px-6 pt-6 pb-40">
         <div className="flex items-center justify-between mb-6">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">
             SOLUTION PREVIEW
@@ -64,7 +64,7 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-6">
+    <div className="flex flex-1 flex-col px-6 pt-6 pb-40">
       <div className="flex flex-col gap-0">
         <div className="flex items-center justify-between mb-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#3D94F5]">

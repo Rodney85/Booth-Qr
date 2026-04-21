@@ -84,7 +84,7 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
 
       </div>
 
-      <div className="mt-auto pb-10">
+      <div className="mt-auto pt-16 pb-10">
         <PrecisionButton 
           disabled={!flow.formData[id]}
           onClick={() => flow.goToNext()}

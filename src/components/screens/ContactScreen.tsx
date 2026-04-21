@@ -71,7 +71,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ flow }) => {
         </div>
       </div>
 
-      <div className="mt-auto pb-10">
+      <div className="mt-auto pt-16 pb-10">
         <PrecisionButton 
           disabled={!isFilled}
           onClick={() => flow.goToNext()}
