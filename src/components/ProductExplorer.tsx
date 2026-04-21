@@ -2,6 +2,7 @@ import { PrecisionButton } from "@/components/ui/PrecisionButton";
 import * as Icons from "lucide-react";
 import type { FlowState } from "@/types/flow";
 import { ChevronLeft } from "lucide-react";
+import { ScreenHeadline } from "@/components/ui/screen-headline";
 
 interface ProductExplorerProps {
   flow: FlowState;
@@ -11,13 +12,14 @@ interface ProductExplorerProps {
 export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
   const isDetail = flow.currentScreen.id === "product_detail";
   const screen = flow.currentScreen;
+  const firstName = flow.formData.name ? (flow.formData.name as string).split(" ")[0] : "";
 
   if (isDetail) {
     return (
       <div className="flex flex-1 flex-col px-6 pt-10">
         <button 
           onClick={() => flow.goToStep("product_list")}
-          className="mb-8 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-medium tracking-[0.05em] text-white/50 transition hover:bg-white/10 hover:text-white"
+          className="mb-8 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
         >
           <ChevronLeft size={10} /> BACK TO SOLUTIONS
         </button>
@@ -61,20 +63,20 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
       <div className="flex flex-col gap-1">
         <button 
           onClick={() => flow.goBack()}
-          className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-medium tracking-[0.05em] text-white/50 transition hover:bg-white/10 hover:text-white"
+          className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
         >
           <ChevronLeft size={10} /> BACK
         </button>
-        <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
+        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
           {screen.content.step_label}
         </div>
-        <h2 
-          className="mt-1 text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-white"
-          dangerouslySetInnerHTML={{ __html: flow.interpolate(screen.content.question) }}
+        <ScreenHeadline
+          screenKey="screen-products"
+          before="Which area sparks your interest, "
+          name={firstName}
+          after="?"
+          subtext="Select one. Your brief will be built around it."
         />
-        <p className="mt-3 text-[13px] leading-[1.5] text-white/50">
-          {flow.interpolate(screen.content.subtext)}
-        </p>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-3 pb-32">
@@ -101,14 +103,14 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
               </div>
               
               <div className="mt-4 flex flex-col gap-1.5">
-                <span className="text-[14px] font-bold tracking-tight text-white">
+                <span className="text-[13px] font-semibold leading-[1.2] text-white">
                   {opt.label}
                 </span>
-                <span className="text-[10px] leading-[1.4] text-white/40 line-clamp-3">
+                <span className="text-[11px] font-normal leading-[1.45] text-white/38">
                   {opt.description}
                 </span>
                 {opt.proof && (
-                  <div className="mt-2 text-[9px] font-semibold uppercase tracking-wider text-[#3D94F5]/80">
+                  <div className="mt-2 text-[10px] font-medium uppercase leading-[1.4] tracking-[0.07em] text-[#3D94F5]">
                     {opt.proof}
                   </div>
                 )}
@@ -133,7 +135,7 @@ export function ProductExplorer({ flow, onFinish }: ProductExplorerProps) {
         ) : (
           <button 
             className="w-full text-center text-[11px] font-bold uppercase tracking-widest text-[#3D94F5] hover:text-[#3D94F5]/80 transition-colors py-4" 
-            onClick={flow.handleSkip}
+            onClick={onFinish}
           >
             {screen.content.skip_cta}
           </button>

@@ -13,7 +13,7 @@ export function PrecisionButton({
   isFullWidth = true,
   ...props
 }: PrecisionButtonProps) {
-  const baseStyles = "relative flex items-center justify-center rounded-lg px-6 py-4 text-[15px] font-medium tracking-[0.02em] transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40";
+  const baseStyles = "relative flex items-center justify-center rounded-lg px-6 py-4 text-[15px] font-semibold tracking-[0.01em] transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40";
   
   const variants = {
     primary: "bg-[var(--color-cs-blue)] text-white hover:bg-[var(--color-cs-blue-hover)]",

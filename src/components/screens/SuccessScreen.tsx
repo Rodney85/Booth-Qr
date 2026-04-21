@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { PrecisionButton } from "@/components/ui/PrecisionButton";
+import { ScreenHeadline } from "@/components/ui/screen-headline";
 import type { FlowState } from "@/types/flow";
 
 interface SuccessScreenProps {
@@ -10,6 +11,7 @@ interface SuccessScreenProps {
 
 export const SuccessScreen: React.FC<SuccessScreenProps> = ({ flow }) => {
   const screen = flow.currentScreen;
+  const firstName = flow.formData.name ? (flow.formData.name as string).split(" ")[0] : "";
   const productListScreen = flow.screens.find(s => s.id === "product_list");
   
   const selectedOptions = productListScreen?.content.options?.filter(o => 
@@ -37,10 +39,10 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ flow }) => {
   return (
     <div className="flex flex-1 flex-col items-center px-8 pt-12 text-center pb-32">
       <motion.div 
-        initial={{ scale: 0.5, opacity: 0 }}
+        initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", damping: 12, stiffness: 200 }}
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#3D94F5] shadow-[0_0_30px_rgba(61,148,245,0.4)]"
+        transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#0A6AE2] shadow-[0_0_30px_rgba(10,106,226,0.4)] mb-6"
       >
         <Check size={32} className="text-white" strokeWidth={3} />
       </motion.div>
@@ -59,29 +61,36 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ flow }) => {
         ))}
       </div>
 
-      <h1 
-        className="mt-4 text-[32px] font-bold leading-[1.1] tracking-[-0.04em] text-white"
-        dangerouslySetInnerHTML={{ __html: flow.interpolate(screen.content.headline) }}
+      <ScreenHeadline
+        screenKey="screen-success"
+        before="You're connected, "
+        name={firstName}
+        after="."
+        subtext={flow.interpolate(displaySubtext)}
       />
-      
-      <p className="mt-4 text-[14px] leading-[1.6] text-white/50 max-w-[280px]">
-        {flow.interpolate(displaySubtext)}
-      </p>
 
-      {/* Next Steps Box */}
-      <div className="mt-10 w-full rounded-2xl border border-white/[0.05] bg-white/[0.02] p-6 text-left">
-        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3D94F5]/60 mb-6">Next Steps</div>
-        <div className="flex flex-col gap-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+        className="mt-10 w-full rounded-2xl border border-white/[0.05] bg-white/[0.02] p-6 text-left"
+      >
+        <div className="text-[10px] font-medium uppercase tracking-[0.10em] text-[#3D94F5] mb-3">
+          Next Steps
+        </div>
+        <div className="flex flex-col gap-5">
           {screen.content.next_steps?.map((step, i) => (
             <div key={i} className="flex gap-4 items-start">
               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#3D94F5]/10 text-[10px] font-bold text-[#3D94F5] border border-[#3D94F5]/20 mt-0.5">
                 {i + 1}
               </div>
-              <div className="text-[13px] leading-[1.4] text-white/60">{step}</div>
+              <div className="text-[12px] font-normal leading-[1.5] text-white/50">
+                {step}
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Sticky Footer */}
       <div className="fixed bottom-0 left-0 right-0 z-20 px-6 pb-10 pt-4 bg-[#071426]/90 backdrop-blur-md border-t border-white/5">

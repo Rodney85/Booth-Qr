@@ -18,7 +18,7 @@ export function ContextBand({ stats }: ContextBandProps) {
             <div className="text-[18px] font-semibold tracking-[-0.5px] text-[#3D94F5] tabular-nums">
               {stat.num}
             </div>
-            <div className="mt-0.5 text-[9px] uppercase tracking-[0.08em] text-white/35">
+            <div className="mt-1 text-[9px] font-normal uppercase tracking-[0.08em] text-white/35">
               {stat.label}
             </div>
           </div>

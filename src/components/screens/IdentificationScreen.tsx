@@ -2,6 +2,7 @@ import React from "react";
 import { ChevronLeft } from "lucide-react";
 import { PrecisionInput } from "@/components/ui/PrecisionInput";
 import { PrecisionButton } from "@/components/ui/PrecisionButton";
+import { ScreenHeadline } from "@/components/ui/screen-headline";
 import type { FlowState } from "@/types/flow";
 
 interface IdentificationScreenProps {
@@ -11,6 +12,7 @@ interface IdentificationScreenProps {
 export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow }) => {
   const screen = flow.currentScreen;
   const id = screen.id;
+  const firstName = flow.formData.name ? (flow.formData.name as string).split(" ")[0] : "";
 
   return (
     <div className="flex flex-1 flex-col px-6 pt-10">
@@ -18,44 +20,62 @@ export const IdentificationScreen: React.FC<IdentificationScreenProps> = ({ flow
         {!flow.isFirstStep && (
           <button 
             onClick={() => flow.goBack()}
-            className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-medium tracking-[0.05em] text-white/50 transition hover:bg-white/10 hover:text-white"
+            className="mb-4 flex w-fit items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[13px] font-normal text-white/45 transition hover:bg-white/10 hover:text-white"
           >
             <ChevronLeft size={10} /> BACK
           </button>
         )}
-        <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
+        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-[#3D94F5]">
           {screen.content.step_label}
         </div>
-        <h2 
-          className="mt-1 text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-white"
-          dangerouslySetInnerHTML={{ __html: flow.interpolate(screen.content.question) }}
-        />
-        <p className="mt-3 text-[13px] leading-[1.5] text-white/50">
-          {flow.interpolate(screen.content.subtext)}
-        </p>
+        
+        {id === "name" ? (
+          <ScreenHeadline
+            screenKey="screen-name"
+            full="Welcome to the Craft Silicon booth."
+            subtext="Counties leave revenue on the table every day — because systems don't talk to each other. We fix that. Let's start with your name."
+          />
+        ) : (
+          <ScreenHeadline
+            screenKey="screen-org"
+            before="Nice to meet you, "
+            name={firstName}
+            after=". Where do you work?"
+            subtext="Knowing your organisation tells us which platform is most relevant — and who on our team should reach out after the conference."
+          />
+        )}
       </div>
 
       <div className="mt-10 flex flex-col gap-8">
-        <PrecisionInput
-          label={screen.content.label || ""}
-          placeholder={screen.content.placeholder}
-          value={(flow.formData[id] as string) || ""}
-          onChange={(e) => flow.updateFormData({ [id]: e.target.value })}
-          autoFocus={id === "name"}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && flow.formData[id]) {
-              flow.goToNext();
-            }
-          }}
-        />
+        <div className="flex flex-col gap-2">
+          <div className="text-[10px] font-medium uppercase tracking-[0.10em] text-white/35">
+            {screen.content.label}
+          </div>
+          <PrecisionInput
+            placeholder={screen.content.placeholder}
+            value={(flow.formData[id] as string) || ""}
+            onChange={(e) => flow.updateFormData({ [id]: e.target.value })}
+            autoFocus={id === "name"}
+            className="text-[16px] font-normal text-white placeholder:text-white/20"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && flow.formData[id]) {
+                flow.goToNext();
+              }
+            }}
+          />
+        </div>
 
         {/* Proof Points for Organisation Step */}
         {id === "organisation" && screen.content.proof_points && (
           <div className="flex flex-col gap-3">
             {screen.content.proof_points.map((pt) => (
-              <div key={pt.title} className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-3">
-                <div className="text-[11px] font-bold text-white/80">{pt.title}</div>
-                <div className="text-[10px] text-white/40">{pt.text}</div>
+              <div key={pt.title} className="flex flex-col gap-1 rounded-xl border border-white/[0.04] bg-white/[0.02] p-3">
+                <div className="text-[13px] font-bold leading-[1.2] text-white">
+                  {pt.title}
+                </div>
+                <div className="text-[11px] font-normal leading-[1.45] text-white/38">
+                  {pt.text}
+                </div>
               </div>
             ))}
           </div>

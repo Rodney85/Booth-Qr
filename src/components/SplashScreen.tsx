@@ -1,6 +1,8 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { TextEffect } from "@/components/ui/text-effect";
 
 export function SplashScreen({ headline, subtext }: { headline: string; subtext: string }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[var(--color-cs-navy-deep)] px-6">
       <motion.div
@@ -20,12 +22,24 @@ export function SplashScreen({ headline, subtext }: { headline: string; subtext:
           </svg>
         </div>
 
-        <h1 className="text-[32px] font-semibold tracking-[-0.03em] text-white">
-          {headline}
+        <h1 className="text-[28px] font-bold leading-[1.12] tracking-[-0.3px] text-white">
+          {shouldReduceMotion ? (
+            headline
+          ) : (
+            <TextEffect per="word" as="span" preset="blur">
+              {headline}
+            </TextEffect>
+          )}
         </h1>
-        <p className="mt-2 text-[15px] font-medium tracking-[0.05em] text-[var(--color-text-dark-secondary)] uppercase">
-          {subtext}
-        </p>
+        <div className="mt-2 text-[14px] font-normal leading-[1.55] text-white/45 uppercase tracking-[0.12em]">
+          {shouldReduceMotion ? (
+            subtext
+          ) : (
+            <TextEffect per="char" as="span" preset="fade" delay={0.5}>
+              {subtext}
+            </TextEffect>
+          )}
+        </div>
 
         <motion.div
           initial={{ opacity: 0 }}

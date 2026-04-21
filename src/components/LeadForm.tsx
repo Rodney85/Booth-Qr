@@ -22,7 +22,7 @@ export default function LeadForm() {
         ? flow.selectedProductIds
             .map(id => gridScreen?.content.options?.find((o) => o.id === id)?.label || id)
             .join(", ")
-        : "just-contact";
+        : "Not Sure";
 
       await submitLead({
         name: currentData.name || "",

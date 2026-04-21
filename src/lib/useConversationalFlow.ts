@@ -73,10 +73,6 @@ export function useConversationalFlow(): FlowState {
     );
   }, []);
 
-  const handleSkip = useCallback(() => {
-    setSelectedProductIds([]);
-    goToStep("success");
-  }, [goToStep]);
 
   const goBack = useCallback(() => {
     if (currentStepIndex > 1) { 
@@ -97,7 +93,6 @@ export function useConversationalFlow(): FlowState {
     isTransitioning,
     toggleProductSelect,
     selectedProductIds,
-    handleSkip,
     interpolate,
     isFirstStep: currentStepIndex <= 1,
     isLastStep: currentStepIndex === screens.length - 1,
