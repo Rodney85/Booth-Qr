@@ -12,7 +12,8 @@ export default function AdminDashboardWrapper() {
   if (!isLoaded) return null;
 
   const role = user?.publicMetadata?.role as string | undefined;
-  const isAdmin = role === "admin" || import.meta.env.DEV;
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  const isAdmin = role === "admin" || (userEmail && CONFIG.ADMIN_EMAILS.includes(userEmail)) || import.meta.env.DEV;
 
   return (
     <>
@@ -30,8 +31,8 @@ export default function AdminDashboardWrapper() {
               <h2 className="text-[12px] font-semibold uppercase tracking-wider text-[#071426]/40">Diagnostic Info</h2>
               <div className="mt-4 flex flex-col gap-2 text-left">
                 <div className="flex justify-between gap-8 text-[13px]">
-                  <span className="text-[#071426]/40 text-nowrap">Your ID:</span>
-                  <span className="font-mono text-[#071426] truncate max-w-[140px]">{user?.id}</span>
+                  <span className="text-[#071426]/40 text-nowrap">Your Email:</span>
+                  <span className="font-mono text-[#071426] truncate max-w-[140px]">{userEmail}</span>
                 </div>
                 <div className="flex justify-between gap-8 text-[13px]">
                   <span className="text-[#071426]/40 text-nowrap">Current Role:</span>
@@ -40,8 +41,8 @@ export default function AdminDashboardWrapper() {
                   </span>
                 </div>
               </div>
-              <p className="mt-4 text-[11px] text-[#071426]/30 max-w-[240px]">
-                If your role is "None detected", please sign out and sign back in to refresh your seat.
+              <p className="mt-6 text-[11px] text-[#071426]/40 max-w-[280px]">
+                To gain access, ensure your email is whitelisted in <code className="bg-slate-100 px-1 py-0.5 rounded">config.ts</code> or set <code className="bg-slate-100 px-1 py-0.5 rounded">role: "admin"</code> in Clerk metadata.
               </p>
               <button 
                 onClick={() => window.location.reload()}

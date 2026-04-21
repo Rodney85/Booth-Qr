@@ -40,6 +40,15 @@ export const submit = mutation({
   },
 });
 
+const ADMIN_EMAILS = ["rodney@craftsilicon.com", "info@craftsilicon.com"];
+
+const checkAdmin = (identity: any) => {
+  if (!identity) return false;
+  const role = identity.role || identity.publicMetadata?.role || identity.tokenIdentifier?.split("|")[2]; // Sometimes role is in tokenIdentifier
+  const email = identity.email;
+  return role === "admin" || (email && ADMIN_EMAILS.includes(email));
+};
+
 export const updateStatus = mutation({
   args: {
     id: v.id("leads"),
@@ -47,7 +56,7 @@ export const updateStatus = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthorized");
+    if (!checkAdmin(identity)) throw new Error("Unauthorized");
     
     return await ctx.db.patch(args.id, { status: args.status });
   },
@@ -57,16 +66,11 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      console.log("No identity found in Convex context");
+    if (!checkAdmin(identity)) {
+      console.log("Unauthorized access attempt to list leads", identity?.email);
       return [];
     }
     
-    // Check role in token metadata
-    // In Clerk, this is often found in identity.role or custom claims
-    const role = (identity as any).role || (identity as any).publicMetadata?.role;
-    console.log("Server side identity:", identity.email, "Role:", role);
-
     return await ctx.db
       .query("leads")
       .withIndex("by_createdAt")
@@ -79,7 +83,7 @@ export const stats = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return { total: 0, today: 0 };
+    if (!checkAdmin(identity)) return { total: 0, today: 0 };
 
     const leads = await ctx.db
       .query("leads")
@@ -103,7 +107,7 @@ export const exportAll = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthorized");
+    if (!checkAdmin(identity)) throw new Error("Unauthorized");
 
     return await ctx.db
       .query("leads")

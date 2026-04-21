@@ -8,4 +8,8 @@ export const CONFIG = {
     WEBSITE: "https://www.craftsilicon.com",
   },
   ADMIN_ROLES: ["admin"],
+  ADMIN_EMAILS: [
+    "rodney@craftsilicon.com", // Main admin
+    "info@craftsilicon.com"
+  ],
 };
